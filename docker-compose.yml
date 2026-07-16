@@ -1,0 +1,47 @@
+services:
+  flask:
+    build: .
+    container_name: flask
+    restart: unless-stopped
+    ports:
+      - "8080:8000"
+    volumes:
+      - ./app/uploads:/app/app/uploads  
+      - ./app:/app/app                 
+    environment:
+      - MONGO_URI=${MONGO_URI}
+    depends_on:
+      - mongo
+    env_file:
+      - .env
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=campus_radio
+    volumes:
+      - mongo_data:/data/db
+  
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8443:443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/ssl/STAR_slu_edu_ph.crt:/etc/nginx/certs/STAR_slu_edu_ph.pem:ro
+      - ./nginx/ssl/cheersslkey.key:/etc/nginx/certs/cheersslkey.pem:ro
+    depends_on:
+      - flask
+
+volumes:
+  mongo_data:

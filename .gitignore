@@ -1,0 +1,6 @@
+app/uploads/
+app/__pycache__/
+app/broadcaster/__pycache__/
+app/viewer/__pycache__/
+app/broadcaster/static/js/__pycache__/
+app/blueprints/__pycache__/

@@ -1,0 +1,128 @@
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #000;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    #video-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: black;
+    }
+
+    #radio-stream,
+    #brb-standby {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: url('/viewer/static/asset/brb.png') center center no-repeat;
+    }
+
+    #brb-standby {
+      z-index: 2;
+    }
+    #radio-stream {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain; /* or 'cover' depending on UX preference */
+      image-rendering: auto;
+    }
+
+
+    h1 {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      margin: 0;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.5);
+      font-size: 1.8em;
+      text-align: center;
+      z-index: 3;
+      letter-spacing: 1px;
+    }
+
+    .viewer-icon-btn {
+      position: absolute;
+      bottom: 24px;
+      z-index: 4;
+      background: rgba(45, 114, 217, 0.9);
+      border: none;
+      border-radius: 50%;
+      padding: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .viewer-icon-btn img {
+      width: 28px;
+      height: 28px;
+    }
+
+    .viewer-icon-btn:hover {
+      background: #1a4e96;
+    }
+
+    #fullscreen-btn { right: 24px; }
+    #captions-btn  { right: 84px; }
+    #settings-btn  { right: 144px; }
+
+    #ticker-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 40px;
+      background-color: rgba(0, 0, 0, 0.85);
+      color: white;
+      overflow: hidden;
+      z-index: 1000;
+      display: none;
+    }
+
+    #ticker-content {
+      white-space: nowrap;
+      display: inline-block;
+      padding-left: 100%;
+      font-size: 1.2rem;
+      line-height: 40px;
+    }
+
+    @keyframes scroll-left {
+      from { transform: translateX(0%); }
+      to   { transform: translateX(-100%); }
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1em;
+        padding: 10px;
+      }
+      .viewer-icon-btn {
+        width: 36px;
+        height: 36px;
+        padding: 6px;
+      }
+      .viewer-icon-btn img {
+        width: 20px;
+        height: 20px;
+      }
+    }
