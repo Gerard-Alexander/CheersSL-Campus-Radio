@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CheerSL</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('broadcaster.static', filename='styles/broadcaster.css') }}"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <!-- DEBUG: {{ url_for('broadcaster.static', filename='js/playlist-manager.js') }} -->
+  </head>
+  <body>
+    <div class="main-header">
+      <img
+        src="{{ url_for('broadcaster.static', filename='icon/CheersLogo.png') }}"
+        alt="CheerSL Logo"
+        class="header-logo"
+      />
+      <span class="main-header-text">Welcome, {{ session.name }}</span>
+      <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
+    </div>
+    <div class="app-grid">
+      <!-- Left Sidebar -->
+      <aside class="left-sidebar">
+        <div class="box-header-grid">
+          <div class="sidebar-header">Devices</div>
+        </div>
+        <div class="section-label">
+          Cameras
+          <span class="section-icons">
+            <img
+              id="cameraPlusBtn"
+              src="{{ url_for('broadcaster.static', filename='icon/plus.png') }}"
+              alt="Add"
+              class="icon-btn-plus"
+            />
+            <img
+              src="{{ url_for('broadcaster.static', filename='icon/drop-down.png') }}"
+              alt="Dropdown"
+              class="icon-btn"
+            />
+          </span>
+        </div>
+        <div class="camera-list"></div>
+        <div
+          id="camera-selection-panel"
+          class="camera-selection-panel"
+          style="display: none"
+        ></div>
+        <div class="section-label">
+          Microphones
+          <span class="section-icons">
+            <img
+              id="microphonePlusBtn"
+              src="{{ url_for('broadcaster.static', filename='icon/plus.png') }}"
+              alt="Add"
+              class="icon-btn-plus"
+            />
+          </span>
+        </div>
+
+        <!-- Sidebar list for selected mics -->
+        <div class="microphone-list"></div>
+
+        <!-- Selection panel popup -->
+        <div
+          id="microphone-selection-panel"
+          class="camera-selection-panel"
+          style="display: none"
+        ></div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <div class="box-header">
+          <div class="stream-preview">Stream Preview</div>
+        </div>
+        <div class="stream-preview-wrapper">
+          <div class="stream-bar"></div>
+          <div id="stream-preview-area" class="stream-preview-area">
+            <div id="camera-preview-container" style="display: none"></div>
+            <div id="video-preview-container" style="display: none"></div>
+            <div id="audio-preview-container" style="display: none">
+              <div class="audio-track-meta">
+                <span class="audio-track-label">Now Playing</span>
+                <div id="audio-track-title" class="audio-track-title">No audio selected</div>
+              </div>
+              <canvas
+                id="audio-visualizer"
+                width="800"
+                height="180"
+                style="
+                  width: 100%;
+                  height: 180px;
+                  display: block;
+                  margin-bottom: 8px;
+                "
+              ></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="controls-wrapper">
+          <div class="controls">
+            <button id="startStream" class="ctrl-btn">Start Stream</button>
+            <button id="stopStream" class="ctrl-btn">Stop Stream</button>
+            <!-- <button id="pauseStream" class="ctrl-btn">Pause Stream</button> -->
+            <button id="muteStream" class="ctrl-btn">Mute Audio</button>
+            <div
+              id="broadcast-status"
+              style="
+                text-align: center;
+                font-size: 0.95rem;
+                color: #4ade80;
+                margin: 0px auto;
+              "
+            ></div>
+          </div>
+        </div>
+        <div class="stream-manager">
+          <div class="stream-manager-header">Stream Manager</div>
+          <div id="stream-manager-title" class="stream-manager-title">Stream Title</div>
+          <div class="stream-manager-content">
+            <div class="ticker-controls">
+              <input
+                type="text"
+                id="tickerMessage"
+                placeholder="Enter ticker message"
+              />
+              <input
+                type="number"
+                id="tickerSpeed"
+                placeholder="Speed (seconds)"
+              />
+              <input
+                type="number"
+                id="tickerLoops"
+                placeholder="Loop count (0 = infinite)"
+              />
+              <input
+                type="number"
+                id="tickerInterval"
+                placeholder="Interval (seconds)"
+              />
+              <button id="startTickerBtn">Start Ticker</button>
+              <button id="stopTickerBtn">Stop Ticker</button>
+            </div>
+            <div class="stream-manager-session">
+              <div class="session-time">0:00:00</div>
+              <div class="session">Session</div>
+              <div class="viewers-count">0</div>
+              <div class="viewers">Viewers</div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Right Section (Queue/Files) -->
+      <div class="right-section">
+        <!-- Queue/Playlist Panel -->
+        <div class="queue-panel">
+          <div class="box-header-grid">
+            <div class="queue-tabs">
+              <div class="queue-tab">Queue</div>
+            </div>
+          </div>
+          <div class="right-side-border">
+            <div class="player-card">
+              <div class="now-playing-block">
+                <strong>Now Playing</strong>
+                <div class="now-playing-content"></div>
+                <!-- injected media block -->
+                <div class="now-playing-controls">
+                  <button id="btnLoop" class="ctrl-btn-msc mode-btn loop" title="Toggle loop" aria-label="Toggle loop">
+                    <img
+                      src="{{ url_for('broadcaster.static', filename='icon/loop.png') }}"
+                      alt="Loop"
+                      style="height: 20px; width: 20px; vertical-align: middle"
+                    />
+                  </button>
+                  <button class="ctrl-btn-msc prev" title="Previous track" aria-label="Previous track">
+                    <img
+                      src="{{ url_for('broadcaster.static', filename='icon/previous.png') }}"
+                      alt="Previous"
+                      style="height: 15px; width: 15px; vertical-align: middle"
+                    />
+                  </button>
+                  <button class="ctrl-btn-msc playpause" id="btnPlayPause" title="Play" aria-label="Play">
+                    <img
+                      id="playPauseIcon"
+                      src="{{ url_for('broadcaster.static', filename='icon/play.png') }}"
+                      alt="Play"
+                      data-play-icon="{{ url_for('broadcaster.static', filename='icon/play.png') }}"
+                      data-pause-icon="{{ url_for('broadcaster.static', filename='icon/pause-button.png') }}"
+                      style="height: 20px; width: 20px; vertical-align: middle"
+                    />
+                  </button>
+                  <button class="ctrl-btn-msc next" title="Next track" aria-label="Next track">
+                    <img
+                      src="{{ url_for('broadcaster.static', filename='icon/next-button.png') }}"
+                      alt="Next"
+                      style="height: 18px; width: 18px; vertical-align: middle"
+                    />
+                  </button>
+                  <button id="btnShuffle" class="ctrl-btn-msc mode-btn shuffle" title="Toggle shuffle" aria-label="Toggle shuffle">
+                    <img
+                      src="{{ url_for('broadcaster.static', filename='icon/shuffle.png') }}"
+                      alt="Shuffle"
+                      style="height: 20px; width: 20px; vertical-align: middle"
+                    />
+                  </button>
+                </div>
+              </div>
+
+              <div class="next-up">
+                <div class="playlist-header">
+                  <strong>Next from: (Playlist)</strong>
+                  <div class="playlist-actions">
+                    <button id="saveOrderBtn" title="Save Current Order">
+                      <img
+                        src="{{ url_for('broadcaster.static', filename='icon/diskette.png') }}"
+                        alt="Save"
+                        class="icon-btn-save"
+                      />
+                    </button>
+                  </div>
+                </div>
+                <div class="playlist-items"></div>
+              </div>
+              <div id="playlistTotalDuration" class="playlist-duration-summary">
+                🕒 Total Duration: 0:00
+              </div>
+            </div>
+            <!-- Playlist -->
+            <div class="player-card">
+              <div class="section-label-playlist">
+                Playlist
+              </div>
+              <div class="your-playlist">
+                <div id="playlist-group" class="playlist-group"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Files Panel -->
+        <div class="files-panel">
+          <div class="box-header-files">
+            <div class="files-tab">Files</div>
+          </div>
+
+          <div class="media-files">
+            <!-- Videos Section -->
+            <div class="section-right">
+              <div class="section-label-right">
+                Videos
+                <span class="plus">
+                  <img
+                    src="{{ url_for('broadcaster.static', filename='icon/plus.png') }}"
+                    alt="Add"
+                    class="icon-btn-plus"
+                  />
+                </span>
+              </div>
+              <div class="card-list">
+                <div class="file-card" data-type="video">
+                  <div class="file-container"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Audio Section -->
+            <div class="section-right">
+              <div class="section-label-right">
+                Audio
+                <span class="plus">
+                  <img
+                    src="{{ url_for('broadcaster.static', filename='icon/plus.png') }}"
+                    alt="Add"
+                    class="icon-btn-plus"
+                  />
+                </span>
+              </div>
+              <div class="card-list">
+                <div class="file-card" data-type="audio">
+                  <div class="file-container"></div>
+                </div>
+              </div>
+            </div>
+            <div class="section-right">
+              <div class="section-label-right">
+                Sound Effects
+                <span class="plus sfx-plus">
+                  <img
+                    src="{{ url_for('broadcaster.static', filename='icon/plus.png') }}"
+                    alt="Add"
+                    class="icon-btn-plus"
+                  />
+                </span>
+              </div>
+              <button id="stopSfxBtn" class="sfx-stop-btn" type="button">Stop Sound Effect</button>
+              <div class="card-list">
+                <div class="file-card" data-type="sfx">
+                  <div class="file-container"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script
+      type="module"
+      src="{{ url_for('broadcaster.static', filename='js/broadcaster/broadcaster.js') }}"
+    ></script>
+    <script>
+      window.STATIC_ICON_PATH =
+        "{{ url_for('broadcaster.static', filename='icon/') }}";
+    </script>
+  </body>
+</html>

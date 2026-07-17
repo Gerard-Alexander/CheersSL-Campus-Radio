@@ -1,0 +1,211 @@
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #000;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    #video-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: black;
+    }
+
+    #audio-panel {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      align-items: center;
+      /* justify-content: center; */
+      pointer-events: none;
+      width: 100%;
+      height: 100%;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    .audio-track-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(7, 48, 102, 0.94), rgba(5, 36, 75, 0.94));
+      border: 1px solid rgba(74, 222, 128, 0.2);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+      width: min(92vw, 1200px);
+      max-width: 100%;
+      text-align: center;
+    }
+
+    .audio-track-label {
+      color: #9ddbb3;
+      font-size: 0.74rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .audio-track-title {
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    #radio-stream,
+    #brb-standby {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: none; /* background provided inline in template via url_for to ensure correct filename and path */
+    }
+
+    #brb-standby {
+      z-index: 2;
+      background-size: cover; /* ensure BRB image covers the viewport */
+      background-position: center center;
+    }
+    #radio-stream {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain;
+      image-rendering: auto;
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    #audio-visualizer {
+      width: min(96vw, 1600px);
+      height: min(72vh, 820px);
+      border-radius: 16px;
+      border: 1px solid rgba(74, 222, 128, 0.16);
+      background: linear-gradient(180deg, rgba(8, 20, 36, 0.98), rgba(7, 48, 102, 0.9));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 12px 28px rgba(3, 20, 43, 0.18);
+      display: none;
+      pointer-events: none;
+    }
+
+
+    h1 {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      margin: 0;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.5);
+      font-size: 1.8em;
+      text-align: center;
+      z-index: 3;
+      letter-spacing: 1px;
+    }
+
+    .viewer-icon-btn {
+      position: absolute;
+      bottom: 24px;
+      z-index: 4;
+      background: rgba(45, 114, 217, 0.9);
+      border: none;
+      border-radius: 50%;
+      padding: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .viewer-icon-btn img {
+      width: 28px;
+      height: 28px;
+    }
+
+    .viewer-icon-btn:hover {
+      background: #1a4e96;
+    }
+
+    #fullscreen-btn { right: 24px; }
+    #captions-btn  { right: 84px; }
+    #settings-btn  { right: 144px; }
+
+    #ticker-logo {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      height: 80px;
+      width: auto;
+      z-index: 1001;
+      padding: 6px 10px;
+      box-sizing: border-box;
+      background-color: black;
+      object-fit: contain;
+    }
+
+    #ticker-container {
+      position: fixed;
+      bottom: 0;
+      left: 56px;
+      width: calc(100% - 56px);
+      height: 40px;
+      background-color: rgba(0, 0, 0, 0.85);
+      color: white;
+      overflow: hidden;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    #ticker-content {
+      white-space: nowrap;
+      display: inline-block;
+      padding-left: 100%;
+      font-size: 1.2rem;
+      line-height: 40px;
+    }
+
+    @keyframes scroll-left {
+      from { transform: translateX(0%); }
+      to   { transform: translateX(-100%); }
+    }
+
+    @media (max-width: 768px) {
+      #audio-panel {
+        padding: 12px;
+      }
+
+      #audio-visualizer {
+        width: 100%;
+        height: min(68vh, 520px);
+      }
+
+      h1 {
+        font-size: 1em;
+        padding: 10px;
+      }
+      .viewer-icon-btn {
+        width: 36px;
+        height: 36px;
+        padding: 6px;
+      }
+      .viewer-icon-btn img {
+        width: 20px;
+        height: 20px;
+      }
+    }

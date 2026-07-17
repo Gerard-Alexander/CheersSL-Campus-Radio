@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Campus Radio Viewer</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('viewer.static', filename='styles/viewer-style.css') }}"
+    />
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+  </head>
+  <body>
+    <div id="connect-overlay" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);z-index:1000;">
+      <div style="text-align:center;color:white;">
+        <h2>Connect to Stream</h2>
+        <button id="connect-btn" style="padding:1em 2em;font-size:1.2em;">Connect</button>
+      </div>
+    </div>
+    <div id="video-container">
+      <video id="radio-stream" autoplay playsinline muted></video>
+      <div id="brb-standby" data-brb-image="{{ url_for('viewer.static', filename='asset/BRB.jpg') }}"></div>
+      <div id="audio-panel" style="display:none;">
+        <div class="audio-track-meta">
+          <span class="audio-track-label">Now Playing</span>
+          <div id="audio-track-title" class="audio-track-title">No audio playing</div>
+        </div>
+        <canvas id="audio-visualizer" width="800" height="240"></canvas>
+      </div>
+    </div>
+
+    <img
+      id="ticker-logo"
+      src="{{ url_for('broadcaster.static', filename='icon/cheer-logo.png') }}"
+      alt="Cheer logo"
+    />
+    <div id="ticker-container">
+      <div id="ticker-content">Live news ticker scrolling here...</div>
+    </div>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="{{ url_for('viewer.static', filename='js/viewer-script.js') }}"></script>
+  </body>
+</html>
