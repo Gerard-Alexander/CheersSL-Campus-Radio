@@ -367,7 +367,7 @@ function startViewerConnection() {
     const tickerText = document.getElementById('ticker-content');
     tickerText.textContent = message;
     tickerText.style.animationDuration = `${speed}s`;
-    tickerContainer.style.display = 'block';
+    tickerContainer.style.display = 'flex';
 
     tickerTimeouts.forEach(clearTimeout);
     tickerTimeouts = [];

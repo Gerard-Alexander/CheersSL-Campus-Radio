@@ -5,9 +5,17 @@ webrtc_bp = Blueprint('webrtc', __name__)
 broadcaster_sid = None
 viewers = {}  # key = viewer sid, value = True
 current_now_playing = None
+current_ticker_state = None
+
+
+def sync_ticker_state(socketio, sid, ticker_state):
+    if ticker_state is None:
+        return
+    socketio.emit('start-ticker', ticker_state, room=sid)
+
 
 def register_webrtc_events(socketio):
-    global broadcaster_sid, viewers, current_now_playing
+    global broadcaster_sid, viewers, current_now_playing, current_ticker_state
 
     @socketio.on('broadcaster')
     def handle_broadcaster():
@@ -25,6 +33,8 @@ def register_webrtc_events(socketio):
             emit('watcher', sid, room=broadcaster_sid)
             if current_now_playing:
                 emit('now-playing', current_now_playing, room=sid)
+            if current_ticker_state is not None:
+                sync_ticker_state(socketio, sid, current_ticker_state)
 
     @socketio.on('offer')
     def handle_offer(watcher_id, description):
@@ -50,7 +60,7 @@ def register_webrtc_events(socketio):
 
     @socketio.on('disconnect')
     def handle_disconnect():
-        global broadcaster_sid
+        global broadcaster_sid, current_now_playing, current_ticker_state
         sid = request.sid
         print(f"[Server] Disconnected: {sid}")
 
@@ -58,6 +68,7 @@ def register_webrtc_events(socketio):
             print("[Server] Broadcaster disconnected")
             broadcaster_sid = None
             current_now_playing = None
+            current_ticker_state = None
             # Disconnect all viewers
             for viewer_sid in viewers:
                 emit('disconnectPeer', sid, room=viewer_sid)
@@ -71,11 +82,15 @@ def register_webrtc_events(socketio):
             
     @socketio.on('start-ticker')
     def handle_start_ticker(data):
+        global current_ticker_state
+        current_ticker_state = data
         print(f"[Ticker Start] {data}")
         emit('start-ticker', data, broadcast=True)
 
     @socketio.on('stop-ticker')
     def handle_stop_ticker():
+        global current_ticker_state
+        current_ticker_state = None
         print("[Ticker Stop]")
         emit('stop-ticker', broadcast=True)
     
