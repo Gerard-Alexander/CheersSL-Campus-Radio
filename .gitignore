@@ -4,3 +4,4 @@ app/broadcaster/__pycache__/
 app/viewer/__pycache__/
 app/broadcaster/static/js/__pycache__/
 app/blueprints/__pycache__/
+.env
