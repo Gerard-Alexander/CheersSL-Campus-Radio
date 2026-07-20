@@ -1,89 +1,119 @@
-# Revamp Campus Radio
+# Campus Radio
 
-CREATE .env file in the root before running docker-compose
-Add this to the file 
+Campus Radio is a Flask-based broadcasting platform for campus radio use cases. It includes a broadcaster dashboard, a public viewer page, media upload support, playlist management, real-time ticker updates, and WebRTC-based live signaling. The application is containerized with Docker Compose and uses MongoDB for persistent storage.
+
+## Overview
+
+This project combines a web frontend, backend APIs, and real-time communication features into a single deployment. It is designed to support:
+
+- broadcaster login and authenticated access
+- media upload and file serving
+- playlist creation and management
+- real-time "now playing" and ticker updates
+- WebRTC-based viewer and broadcaster communication
+- Docker-based deployment with Flask, MongoDB, and Nginx
+
+## Features
+
+- Secure login flow with session-based authentication
+- Admin user initialization from environment variables
+- Audio, video, and image upload support
+- Playlist CRUD operations stored in MongoDB
+- Real-time ticker and playback synchronization for viewers
+- WebRTC event handling for broadcaster/viewer signaling
+- Containerized deployment with Docker Compose
+
+## Tech Stack
+
+- Backend: Flask, Flask-SocketIO, Gunicorn, eventlet
+- Database: MongoDB with PyMongo
+- Frontend: HTML, CSS, and plain JavaScript
+- Infrastructure: Docker Compose and Nginx
+
+## Project Structure
+
+- app/main.py: Flask app setup, blueprint registration, and Socket.IO initialization
+- app/broadcaster/: broadcaster UI, templates, and client-side logic
+- app/viewer/: public viewer interface and viewer-side scripts
+- app/blueprints/: authentication, uploads, playlists, and WebRTC handlers
+- app/db.py: MongoDB connection and collection access
+- app/app/uploads/: uploaded media storage
+- nginx/: Nginx configuration and SSL files
+- tests/: automated regression tests
+- docker-compose.yml: service definitions for Flask, MongoDB, and Nginx
+
+## Environment Setup
+Create a `.env` file in the project root before starting the containers and add the following values:
+
+```env
+SECRET_KEY=replace-with-a-secure-secret
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=change-me
+ADMIN_NAME=Administrator
+
+MONGO_URI=mongodb://myuser:mypassword@mongo:27017/campus_radio
+MONGO_INITDB_ROOT_USERNAME=myuser
+MONGO_INITDB_ROOT_PASSWORD=mypassword
+```
+
+> Keep the `.env` file private and do not commit it to version control.
 
 ---
 
-## Project Architecture
-This project is built with a Flask backend, Socket.IO WebRTC signaling, MongoDB persistence, and Nginx as an SSL reverse proxy. The app is containerized using Docker Compose.
-
-- `flask` service: runs the Flask app on port `8000`
-- `mongo` service: stores users, playlists, and upload metadata
-- `nginx` service: terminates SSL and proxies requests to Flask
-- `app/broadcaster`: authenticated broadcaster UI and controls
-- `app/viewer`: public viewer UI and stream playback  
-
 ### Request flow
-1. User request reaches Nginx on `8443`.
-2. Nginx proxies traffic to Flask at `flask:8000`.
+1. Client requests reach Nginx on port `8443`.
+2. Nginx forwards traffic to Flask at `flask:8000`.
 3. Flask serves:
    - `/` → viewer page
    - `/broadcaster` → broadcaster dashboard
-   - `/api` / playlist / upload endpoints via blueprints
-4. Socket.IO handles real-time WebRTC signaling for live stream viewers and broadcaster controls.
+4. Socket.IO manages real-time WebRTC signaling for the broadcaster and connected viewers.
 
 ---
 
 ## Source Code Documentation
 ### Core server files
 - `app/main.py`
-  - Creates the Flask app and loads environment settings
-  - Registers blueprints for broadcaster, viewer, authentication, uploads, and playlist
+  - Creates the Flask application and loads environment settings
+  - Registers the broadcaster, viewer, authentication, upload, and playlist blueprints
   - Initializes Flask-SocketIO and WebRTC event registration
 
 - `app/broadcaster/routes.py`
-  - Defines the authenticated broadcaster route and serves `broadcaster.html`
+  - Defines the authenticated broadcaster route and serves the broadcaster template
 
 - `app/viewer/routes.py`
-  - Defines the viewer route and serves `viewer.html`
-  - Uses `static_url_path='/assets'` for viewer assets
+  - Defines the viewer route and serves the viewer template
 
 ### Blueprints
 - `app/blueprints/authentication.py`
-  - Handles login, logout, and access control
+  - Handles login, logout, and session-based access control
 - `app/blueprints/playlist.py`
-  - Provides playlist CRUD endpoints
+  - Provides playlist CRUD endpoints for saving and managing playlists
 - `app/blueprints/uploads.py`
-  - Handles file upload, download, delete, and listing
+  - Handles file upload, serving, deletion, and file listing
 - `app/blueprints/webrtc.py`
   - Implements Socket.IO WebRTC signaling events for broadcaster/viewer connectivity
 
 ### Frontend structure
 - `app/broadcaster/static/js/broadcaster/broadcaster.js`
-  - Initializes broadcaster UI, playlist loading, stream controls, and device selection
+  - Initializes the broadcaster UI, playlist loading, stream controls, and device selection
 - `app/broadcaster/static/js/playlist/playlist-manager.js`
   - Manages playlist state and item rendering
 - `app/broadcaster/static/js/playlist/playlist-ui.js`
-  - Renders playlist items and now-playing UI
+  - Renders playlist items and the now-playing interface
 - `app/broadcaster/static/js/playlist/playlist-media.js`
-  - Controls playback of audio/video items and updates now-playing state
+  - Controls playback of audio and video items and updates the current state
 - `app/broadcaster/static/js/broadcaster/webrtc-handler.js`
   - Tracks connected viewers and handles messaging
 - `app/viewer/static/js/viewer-script.js`
   - Connects viewers to the stream and handles player events
 
 ## Directory Summary
-- `app/`: Flask app source code
-- `app/broadcaster/`: broadcaster-facing routes, templates, and JS
-- `app/viewer/`: viewer-facing routes, templates, and JS
+- `app/`: Flask application source code
+- `app/broadcaster/`: broadcaster-facing routes, templates, and JavaScript
+- `app/viewer/`: viewer-facing routes, templates, and JavaScript
 - `app/blueprints/`: modular backend APIs and authentication logic
 - `nginx/`: Nginx configuration and SSL certificates
 - `docker-compose.yml`: service definitions and container orchestration
-
----
-
-### Admin Credentials
-ADMIN_EMAIL=example@example.com
-ADMIN_PASSWORD=examplePassword
-ADMIN_NAME=Example
-
-Docker will automatically generate the secret key.
-
----
-
-### .env File Configurations
-.env file contains credentials for the admin, as well as the username and password for the database. Make sure that this file is not easily accessible. Put this in .gitignore if uploading in git
 
 ---
 
@@ -218,118 +248,3 @@ After deploying the project in Docker containerization, the public IP address of
    8. External port number - 443 -- 443 
 
 ---
-
-## Admin User Guide
-
-### Overview
-The Campus Radio Broadcaster Dashboard allows admins to manage live streaming with video/audio playback and device management. This guide explains how to upload media files and queue them for broadcast.
-
-### Dashboard Layout
-
-The broadcaster dashboard is divided into 4 main sections:
-
-1. **Devices (Left Sidebar)** - Camera and microphone selection
-2. **Stream Preview (Center)** - Live stream display and controls
-3. **Queue (Top Right)** - Now Playing and upcoming queue
-4. **Files (Right Panel)** - Uploaded videos and audio files
-
----
-
-### Uploading Media Files
-
-#### How to Upload Videos or Audio
-
-1. **Locate the Files Panel** on the right side of the dashboard
-   - You'll see two sections: **Videos** and **Audio**
-
-2. **Click the Plus Icon (+)** next to the file type you want to upload
-   - Videos: Upload MP4, WebM, AVI, or MOV files
-   - Audio: Upload MP3, WAV, or OGG files
-
-3. **Select a file** from your computer
-   - The upload will start automatically
-
-4. **Wait for completion**
-   - The file will appear as a thumbnail/card in the Files section
-   - Videos show a generated thumbnail from the first frame
-   - Audio files show an MP3 placeholder icon
-   - Each file displays:
-     - Preview image/icon
-     - Filename (truncated if too long)
-     - "Uploaded by: [Admin Name]" label
-
-#### Supported File Types
-
-| Type | Formats |
-|------|---------|
-| **Video** | MP4, WebM, AVI, MOV |
-| **Audio** | MP3, WAV, OGG |
-
----
-
-### Adding Media to Queue
-
-#### Queue Structure
-
-The **Queue** panel shows:
-- **Now Playing** - Currently active/playing media item
-- **Next from: (Playlist)** - The playlist being used
-- **Total Duration** - Sum of all queued items
-- **Playlist** - List of queued items in order
-
-#### How to Queue Files
-
-1. **Locate a file** in the Files panel (Videos or Audio section)
-2. **Click on the file thumbnail or name**
-   - The file is automatically added to the Queue
-   - It will appear at the end of the queue list
-
-3. **Wait for duration detection**
-   - Each file's duration is automatically calculated
-   - Total duration updates in the "Total Duration" display
-
-#### Managing the Queue
-
-- **Remove from Queue**: Click the **X button** on the item in the queue list
-- **Reorder Queue**: Drag and drop items in the queue to reorder playback
-- **Delete File**: Click the **close button** on the file thumbnail to permanently delete it
-
-#### Playing Media
-
-1. **Click a queued item** to set it as the current playing item
-2. Use **playback controls**:
-   - **Start Stream** - Begin broadcasting the stream
-   - **Stop Stream** - Stop the broadcast
-   - **Pause Stream** - Pause current playback
-   - **Mute Audio** - Silence the audio output
-
----
-
-### Stream Preview
-
-The **Stream Preview** section shows what viewers will see:
-- Live camera feed (if camera is connected)
-- Currently playing video/audio
-- Audio waveform visualizer for audio content
-
-#### Controlling the Stream
-
-| Button | Function |
-|--------|----------|
-| **Start Stream** | Begins broadcasting to viewers |
-| **Stop Stream** | Stops the stream transmission |
-| **Pause Stream** | Pauses playback without stopping broadcast |
-| **Mute Audio** | Silences audio without stopping playback |
-
----
-
-### Stream Manager (Ticker Controls)
-
-Below the Stream Preview, the **Stream Manager** section provides:
-
-- **Stream Title** - Enter a title for the current session
-- **Speed (seconds)** - Ticker speed
-- **Loop count** - Number of times ticker repeats (0 = infinite)
-- **Interval (seconds)** - Delay between ticker messages
-- **Start Ticker** - Begin displaying ticker messages
-- **Stop Ticker** - Stop the ticker display
