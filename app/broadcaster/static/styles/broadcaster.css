@@ -69,8 +69,7 @@ body {
 
 /* Highlighted Feature*/
 .selected, .highlighted {
-  outline: 2px solid #4ade80;
-  background: #e6fff3 !important;
+  outline: 2px solid #1f5563;
 }
 
 /* Devices Panel Background */
@@ -278,6 +277,10 @@ button.icon-btn-plus img {
 .mic-status-badge {
   font-size: 0.85em;
   font-weight: bold;
+}
+
+.mic-label {
+  color: #000;
 }
 
 /* Microphone */
@@ -710,7 +713,7 @@ button.icon-btn-plus img {
 }
 
 .player-card {
-  background: #f8fafc;                /* Light card background */
+  background: 'lightgray';                /* Light card background */
   border-radius: 16px;
   box-shadow: 0 4px 16px rgba(3, 20, 43, 0.1);
   padding: 3px 3px 6px 3px;
@@ -1157,6 +1160,12 @@ button.icon-btn-plus-blue img {
 
 .playlist-btn:hover {
   background: #05234B;
+}
+
+.playlist-btn.selected {
+  background: #05234B;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.35);
 }
 
 .playlist-delete-btn {

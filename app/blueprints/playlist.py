@@ -24,11 +24,16 @@ def get_playlist(name):
 @playlist_bp.route("/playlists", methods=["POST"])
 @login_required
 def save_playlist():
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
+    if not isinstance(data, dict):
+        return jsonify({"error": "Invalid request"}), 400
     name = data.get("name")
     items = data.get("items")
 
-    if not name or not isinstance(items, list):
+    if isinstance(name, str):
+        name = name.strip()
+
+    if not isinstance(name, str) or not name or not isinstance(items, list):
         return jsonify({"error": "Invalid request"}), 400
 
     now = datetime.datetime.utcnow()
@@ -47,6 +52,31 @@ def save_playlist():
     )
 
     return jsonify({"message": "Playlist saved", "updated": result.modified_count > 0}), 200
+
+@playlist_bp.route("/playlists/create", methods=["POST"])
+@login_required
+def create_playlist():
+    data = request.get_json(silent=True) or {}
+    if not isinstance(data, dict):
+        return jsonify({"error": "Invalid request"}), 400
+    name = data.get("name")
+
+    if isinstance(name, str):
+        name = name.strip()
+
+    if not isinstance(name, str) or not name:
+        return jsonify({"error": "Playlist name is required"}), 400
+    if db.playlists.find_one({"name": name}, {"_id": 1}):
+        return jsonify({"error": "A playlist with that name already exists"}), 409
+
+    now = datetime.datetime.utcnow()
+    db.playlists.insert_one({
+        "name": name,
+        "items": [],
+        "created_at": now,
+        "updated_at": now
+    })
+    return jsonify({"message": "Playlist created"}), 201
 
 @playlist_bp.route('/playlists/remove_file', methods=['POST'])
 @login_required

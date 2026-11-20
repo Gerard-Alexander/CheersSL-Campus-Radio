@@ -60,6 +60,24 @@ async function refreshPlaylistList() {
     await setUpPlaylist();
 }
 
+document.getElementById('createPlaylistBtn')?.addEventListener('click', async () => {
+    const playlistName = prompt('Name the new playlist:');
+    if (!playlistName || !playlistName.trim()) {
+        return;
+    }
+
+    const name = playlistName.trim();
+    const result = await playlistManager.createPlaylist(name);
+    if (!result?.success) {
+        alert(result?.message || 'Failed to create playlist.');
+        return;
+    }
+
+    currentPlaylist = name;
+    playlistManager.core.currentPlaylistName = name;
+    await refreshPlaylistList();
+});
+
 document.getElementById("saveOrderBtn")?.addEventListener("click", async () => {
     const orderedFileIds = playlistManager.core.items.map(item => item.fileId);
     const orderedNames = playlistManager.core.items.map(item => item.name);
@@ -67,17 +85,22 @@ document.getElementById("saveOrderBtn")?.addEventListener("click", async () => {
     console.log("[Save Order] Playlist fileId order:", orderedFileIds);
     console.log("[Save Order] Playlist item names:", orderedNames);
 
-    if (currentPlaylist != null) {
-        console.log("Saving it to", currentPlaylist);
-        const result = await playlistManager.savePlaylist(currentPlaylist.trim());
-        if (result?.success) {
-            alert("Playlist order saved successfully.");
-        } else {
-            console.warn("Failed to save playlist:", result?.message);
-            alert("Failed to save playlist.");
-        }
+    const playlistName = currentPlaylist || playlistManager.core.currentPlaylistName;
+    if (!playlistName) {
+        alert("Create or select a playlist before saving.");
+        return;
+    }
+
+    console.log("Saving it to", playlistName);
+    const result = await playlistManager.savePlaylist(playlistName.trim());
+    if (result?.success) {
+        currentPlaylist = playlistName.trim();
+        playlistManager.core.currentPlaylistName = currentPlaylist;
+        await refreshPlaylistList();
+        alert("Playlist order saved successfully.");
     } else {
-        alert("No playlist is currently selected.");
+        console.warn("Failed to save playlist:", result?.message);
+        alert(result?.message || "Failed to save playlist.");
     }
 });
 async function setUpPlaylist() {
@@ -94,9 +117,14 @@ async function setUpPlaylist() {
                 btn.type = 'button';
                 btn.textContent = playlist.name;
                 btn.classList.add('playlist-btn');
+                if (playlist.name === currentPlaylist) {
+                    btn.classList.add('selected');
+                }
                 btn.addEventListener('click', () => {
                     playlistManager.loadPlaylist(playlist.name);
                     currentPlaylist = playlist.name;
+                    playlistManager.core.currentPlaylistName = playlist.name;
+                    setUpPlaylist();
                 });
 
                 const deleteBtn = document.createElement('button');

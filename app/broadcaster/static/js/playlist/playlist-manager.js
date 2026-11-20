@@ -2,7 +2,7 @@ import { playlistCore } from './playlist-core.js';
 import { setMediaDuration, updateTotalDuration } from './playlist-duration.js';
 import { renderPlaylist, clearPlaylistUI, updateNowPlaying, setUpPlaylist, setNowPlayingDeleteHandler } from './playlist-ui.js';
 import { PlaylistControls } from './playlist-controls.js';
-import { savePlaylist, listAllPlaylists, loadPlaylist, deletePlaylist } from './playlist-storage.js';
+import { savePlaylist, createPlaylist, listAllPlaylists, loadPlaylist, deletePlaylist } from './playlist-storage.js';
 import { playMediaItem } from './playlist-media.js';
 import { clearStreamAndPreview } from '../broadcaster/stream-manager.js';
 import { stopAudioVisualizer } from '../broadcaster/waveform-visualizer.js';
@@ -123,6 +123,10 @@ class PlaylistManager {
   // --- Storage ---
   async savePlaylist(name) {
     return await savePlaylist(name, this.core.items);
+  }
+
+  async createPlaylist(name) {
+    return await createPlaylist(name);
   }
 
   async listAllPlaylists() {

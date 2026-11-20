@@ -166,7 +166,7 @@
             </div>
           </div>
           <div class="right-side-border">
-            <div class="player-card">
+            <div class="player-card" style="background: lightgrey;">
               <div class="now-playing-block">
                 <strong>Now Playing</strong>
                 <div class="now-playing-content"></div>
@@ -233,9 +233,15 @@
               </div>
             </div>
             <!-- Playlist -->
-            <div class="player-card">
+            <div class="player-card" style="background: lightgrey;">
               <div class="section-label-playlist">
                 Playlist
+                <button id="createPlaylistBtn" class="icon-btn-plus-blue" type="button" title="Create playlist" aria-label="Create playlist">
+                  <img
+                    src="{{ url_for('broadcaster.static', filename='icon/plus.png') }}"
+                    alt=""
+                  />
+                </button>
               </div>
               <div class="your-playlist">
                 <div id="playlist-group" class="playlist-group"></div>
